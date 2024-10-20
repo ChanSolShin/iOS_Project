@@ -8,10 +8,12 @@
 import SwiftUI
 import Foundation
 import Combine
+import FirebaseAuth
 
 class LoginViewModel: ObservableObject {
-    @Published var user: SignUpModel = SignUpModel(username: "", password: "")
+    @Published var user: SignUpUserModel = SignUpUserModel(username: "", password: "")
     @Published var isLoggedIn: Bool = false
+    @Published var loginErrorMessage: String?
     
     // 이메일 유효성 검사
     var isValidEmail: Bool {
@@ -25,15 +27,21 @@ class LoginViewModel: ObservableObject {
         return user.password.isEmpty
     }
     
+    // Firebase 로그인 로직
     func login() {
-        // 로그인 성공 로직 (예: API 호출 후 성공 시)
-        isLoggedIn = true
+        
+        Auth.auth().signIn(withEmail: user.username, password: user.password) { [weak self] authResult, error in
+            // 로그인 성공 시
+            print("로그인 성공")
+            self?.isLoggedIn = true
+            self?.loginErrorMessage = nil
+            if let error = error {
+                self?.loginErrorMessage = error.localizedDescription // 로그인 실패 시 오류 메시지 설정
+                self?.isLoggedIn = false
+                return
+            }
+        }
     }
-
-    func logout() {
-        // 로그아웃 로직
-        isLoggedIn = false
-    }
-    
 }
+
 

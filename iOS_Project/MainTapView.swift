@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import NMapsMap
 
 struct MainTabView: View {
     var body: some View {
@@ -14,7 +15,7 @@ struct MainTabView: View {
                 .tabItem {
                     Image(systemName: "list.bullet")
                     Text("모임")
-                }
+                    }
             
             FriendView() // 두 번째 탭: 친구 목록
                 .tabItem {

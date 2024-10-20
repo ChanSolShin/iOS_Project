@@ -6,21 +6,26 @@
 //
 
 import SwiftUI
+import NMapsMap
 
 struct MeetingListView: View {
     @StateObject private var viewModel = MeetingListViewModel() // ViewModel 인스턴스 생성
     @State private var searchText = "" // 검색 텍스트
     @State private var isSearching = false // 검색 상태
     
+    
+    
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack(alignment: .bottomTrailing) {
+                
                 VStack {
                     HStack {
                         Text("모임")
                             .font(.largeTitle)
                             .foregroundColor(.black)
                             .padding()
+                            .padding(.top,15)
                         Spacer()
                         // 돋보기 버튼 추가
                         Button(action: {
@@ -33,6 +38,7 @@ struct MeetingListView: View {
                                 .font(.title)
                         }
                         .padding(.trailing)
+                        .padding(.top,15)
                     }
                     // 검색 상태에 따라 텍스트 필드 표시
                     if isSearching {
@@ -41,40 +47,44 @@ struct MeetingListView: View {
                                 .padding(.leading, 10)
                             TextField("검색어를 입력하세요", text: $searchText)
                                 .textFieldStyle(RoundedBorderTextFieldStyle())
+                                .frame(width: 300)
                             Button(action: {
                                 searchText = ""
+                                withAnimation {
+                                    isSearching.toggle()
+                                }
                             }) {
-                                Image(systemName: "x.circle.fill")
+                                Text("취소")
                                     .font(.headline)
-                                    .foregroundColor(.gray)
-                                    .padding(.leading, -10)
                             }
-                                .padding()
-                           
-                            
-                            
                         }
                     }
-                    List(viewModel.meetings.filter { meeting in
-                        searchText.isEmpty || meeting.title.localizedCaseInsensitiveContains(searchText) // 검색 필터링
-                    }) { meeting in
-                        HStack {
-                            NavigationLink(destination: MeetingView(meeting: meeting)) {
-                                Text(meeting.title)
-                                    .font(.headline)
+                    ScrollView {
+                        VStack(spacing: 10) {
+                            ForEach(viewModel.meetings.filter { meeting in
+                                searchText.isEmpty || meeting.title.localizedCaseInsensitiveContains(searchText) // 검색 필터링
+                            }) { meeting in
+                                NavigationLink(destination: MeetingView(meeting: meeting)) {
+                                    HStack {
+                                        Text(meeting.title)
+                                            .font(.headline)
+                                            .padding()
+                                            .foregroundColor(.black)
+                                        Spacer()
+                                        Text("\(meeting.date, formatter: dateFormatter)") // 오른쪽에 날짜 표시
+                                            .font(.subheadline)
+                                            .foregroundColor(.gray)
+                                    }
                                     .padding()
-                                    .foregroundColor(.black)
+                                }
+                                Divider()
                             }
-                            Spacer()
-                            Text("\(meeting.date, formatter: dateFormatter)") // 오른쪽에 날짜 표시
-                                .font(.subheadline)
-                                .foregroundColor(.gray)
                         }
-                    }
+                        .padding(.horizontal)                    }
                 }
                 
                 // 모임생성 버튼
-                NavigationLink(destination: AddMeetingView()) {
+                NavigationLink(destination: AddMeetingView(viewModel: AddMeetingViewModel()), label: {
                     Text(" + 모임생성")
                         .font(.title2)
                         .foregroundColor(.white)
@@ -82,11 +92,11 @@ struct MeetingListView: View {
                         .background(Color.blue)
                         .cornerRadius(30)
                         .padding()
-                }
+                })
             }
-            
         }
     }
+    
     
     private var dateFormatter: DateFormatter {
         let formatter = DateFormatter()

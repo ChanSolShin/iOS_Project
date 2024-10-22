@@ -8,9 +8,8 @@ struct SignUpView: View {
     @State private var showPassword = false
     
     var body: some View {
-        NavigationView {
+        ScrollView {
             VStack {
-                
                 Text("이름")
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.leading, 25)
@@ -140,6 +139,15 @@ struct SignUpView: View {
                 .cornerRadius(8)
                 .padding(.horizontal, 30)
                 
+                // 비밀번호 검사 메시지
+                if viewModel.password.count < 6 && !viewModel.password.isEmpty {
+                    Text("비밀번호를 6자리 이상 입력해 주세요.")
+                        .padding(.leading, 200)
+                        .foregroundColor(.red)
+                        .font(.caption)
+                        .padding(.horizontal, 10)
+                }
+                
                 // 비밀번호 확인 입력 필드
                 Text("비밀번호확인")
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -168,7 +176,7 @@ struct SignUpView: View {
                 }
                 .padding()
                 .background(Color.gray.opacity(0.2))
-                .cornerRadius(8)
+                .cornerRadius(10)
                 .padding(.horizontal, 30)
                 
                 
@@ -189,18 +197,23 @@ struct SignUpView: View {
                         .cornerRadius(8)
                         .opacity(viewModel.successCreate ? 0.5 : 1)
                 }
-                // 모든 텍스트 필드가 제대로 채워지지 않으면 회원가입 버튼을 누를 수 없음 
+                // 모든 텍스트 필드가 제대로 채워지지 않으면 회원가입 버튼을 누를 수 없음
                 .disabled(viewModel.successCreate)
-                
                 .padding(.top, 40)
-                
                 Spacer()
             }
         }
+        
         .navigationTitle("회원가입")
         .font(.largeTitle)
         .alert(isPresented: .constant(viewModel.signUpErrorMessage != nil)) {
-            Alert(title: Text("회원가입 실패"), message: Text(viewModel.signUpErrorMessage ?? ""), dismissButton: .default(Text("확인")))
+            Alert(
+                title: Text("회원가입 실패"),
+                message: Text(viewModel.signUpErrorMessage ?? ""),
+                dismissButton: .default(Text("확인")) {
+                    viewModel.signUpErrorMessage = nil // 알림창 닫힐 때 오류 메시지 초기화
+                }
+            )
         }
     }
 }
